@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RoomsRouteImport } from './routes/rooms'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as ChallengesRouteImport } from './routes/challenges'
@@ -24,6 +25,11 @@ const RoomsRoute = RoomsRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartnersRoute = PartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeaderboardRoute = LeaderboardRouteImport.update({
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/challenges': typeof ChallengesRoute
   '/feed': typeof FeedRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/partners': typeof PartnersRoute
   '/profile': typeof ProfileRoute
   '/rooms': typeof RoomsRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/challenges': typeof ChallengesRoute
   '/feed': typeof FeedRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/partners': typeof PartnersRoute
   '/profile': typeof ProfileRoute
   '/rooms': typeof RoomsRoute
 }
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/challenges': typeof ChallengesRoute
   '/feed': typeof FeedRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/partners': typeof PartnersRoute
   '/profile': typeof ProfileRoute
   '/rooms': typeof RoomsRoute
 }
@@ -79,16 +88,25 @@ export interface FileRouteTypes {
     | '/challenges'
     | '/feed'
     | '/leaderboard'
+    | '/partners'
     | '/profile'
     | '/rooms'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/challenges' | '/feed' | '/leaderboard' | '/profile' | '/rooms'
+  to:
+    | '/'
+    | '/challenges'
+    | '/feed'
+    | '/leaderboard'
+    | '/partners'
+    | '/profile'
+    | '/rooms'
   id:
     | '__root__'
     | '/'
     | '/challenges'
     | '/feed'
     | '/leaderboard'
+    | '/partners'
     | '/profile'
     | '/rooms'
   fileRoutesById: FileRoutesById
@@ -98,6 +116,7 @@ export interface RootRouteChildren {
   ChallengesRoute: typeof ChallengesRoute
   FeedRoute: typeof FeedRoute
   LeaderboardRoute: typeof LeaderboardRoute
+  PartnersRoute: typeof PartnersRoute
   ProfileRoute: typeof ProfileRoute
   RoomsRoute: typeof RoomsRoute
 }
@@ -116,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partners': {
+      id: '/partners'
+      path: '/partners'
+      fullPath: '/partners'
+      preLoaderRoute: typeof PartnersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leaderboard': {
@@ -154,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChallengesRoute: ChallengesRoute,
   FeedRoute: FeedRoute,
   LeaderboardRoute: LeaderboardRoute,
+  PartnersRoute: PartnersRoute,
   ProfileRoute: ProfileRoute,
   RoomsRoute: RoomsRoute,
 }

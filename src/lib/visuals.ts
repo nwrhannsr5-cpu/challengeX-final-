@@ -19,8 +19,17 @@ export const healthImages = {
     "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=80",
 };
 
-export function challengeImage(category?: string | null) {
+export function challengeImage(category?: string | null, title?: string | null) {
   const key = (category || "").toLowerCase();
   if (key in healthImages) return healthImages[key as keyof typeof healthImages];
+
+  // Fallback to inferring from title if category is missing or invalid
+  const t = (title || "").toLowerCase();
+  if (t.includes("step") || t.includes("run") || t.includes("walk") || t.includes("cardio")) return healthImages.cardio;
+  if (t.includes("water") || t.includes("drink") || t.includes("hydrat")) return healthImages.activity;
+  if (t.includes("protein") || t.includes("eat") || t.includes("diet") || t.includes("meal")) return healthImages.nutrition;
+  if (t.includes("sleep") || t.includes("rest") || t.includes("mind") || t.includes("meditat")) return healthImages.recovery;
+  if (t.includes("squat") || t.includes("lift") || t.includes("push") || t.includes("strength") || t.includes("workout")) return healthImages.strength;
+
   return healthImages.wellness;
 }

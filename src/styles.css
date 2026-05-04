@@ -49,70 +49,70 @@
 
 :root,
 .light {
-  --background: oklch(0.975 0.015 285);
-  --foreground: oklch(0.18 0.025 285);
-  --card: oklch(1 0 0 / 94%);
-  --card-foreground: oklch(0.18 0.025 285);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.025 285);
-  --primary: oklch(0.56 0.22 292);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.68 0.12 235);
-  --secondary-foreground: oklch(0.14 0.03 250);
-  --muted: oklch(0.93 0.018 285);
-  --muted-foreground: oklch(0.48 0.035 285);
-  --accent: oklch(0.9 0.05 292);
-  --accent-foreground: oklch(0.28 0.09 292);
-  --destructive: oklch(0.58 0.19 25);
-  --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.86 0.025 285);
-  --input: oklch(0.9 0.02 285);
-  --ring: oklch(0.56 0.22 292);
-  --sidebar: oklch(0.985 0.012 285);
-  --sidebar-foreground: oklch(0.38 0.035 285);
-  --sidebar-accent: oklch(0.56 0.22 292);
-  --sidebar-border: oklch(0.86 0.025 285);
-  --streak: oklch(0.75 0.15 80);
-  --streak-foreground: oklch(0.22 0.05 80);
-  --rank-bronze: oklch(0.64 0.11 55);
-  --rank-silver: oklch(0.7 0.02 230);
-  --rank-gold: oklch(0.78 0.15 90);
-  --rank-platinum: oklch(0.76 0.08 190);
-  --rank-diamond: oklch(0.68 0.13 220);
-  --radius: 0.75rem;
+  --background: #1C3B32; /* Deep Forest Green */
+  --foreground: #F5EBE1; /* Warm Cream */
+  --card: rgba(35, 78, 64, 0.75); /* Translucent Green */
+  --card-foreground: #F5EBE1;
+  --popover: #1C3B32;
+  --popover-foreground: #F5EBE1;
+  --primary: #D8A47F; /* Terracotta Peach */
+  --primary-foreground: #152720; /* Very dark green text */
+  --secondary: #688A60; /* Earthy Green */
+  --secondary-foreground: #F5EBE1;
+  --muted: #523626; /* Chocolate Brown */
+  --muted-foreground: #E2CDBA;
+  --accent: #A66B4A; /* Copper */
+  --accent-foreground: #F5EBE1;
+  --destructive: #e17055;
+  --destructive-foreground: #ffffff;
+  --border: rgba(245, 235, 225, 0.15); /* Soft cream border */
+  --input: rgba(35, 78, 64, 0.9);
+  --ring: #D8A47F;
+  --sidebar: #152720;
+  --sidebar-foreground: #F5EBE1;
+  --sidebar-accent: #688A60;
+  --sidebar-border: rgba(245, 235, 225, 0.1);
+  --streak: #D8A47F;
+  --streak-foreground: #152720;
+  --rank-bronze: #A66B4A;
+  --rank-silver: #688A60;
+  --rank-gold: #D8A47F;
+  --rank-platinum: #F5EBE1;
+  --rank-diamond: #688A60;
+  --radius: 1.25rem;
 }
 
 .dark {
-  --background: oklch(0.145 0.018 285);
-  --foreground: oklch(0.96 0.012 285);
-  --card: oklch(0.2 0.022 285 / 94%);
-  --card-foreground: oklch(0.96 0.012 285);
-  --popover: oklch(0.18 0.022 285);
-  --popover-foreground: oklch(0.96 0.012 285);
-  --primary: oklch(0.64 0.24 292);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.72 0.13 235);
-  --secondary-foreground: oklch(0.11 0.025 250);
-  --muted: oklch(0.25 0.02 285);
-  --muted-foreground: oklch(0.72 0.025 285);
-  --accent: oklch(0.27 0.05 292);
-  --accent-foreground: oklch(0.94 0.025 292);
-  --destructive: oklch(0.63 0.22 25);
-  --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.31 0.022 285);
-  --input: oklch(0.24 0.024 285);
-  --ring: oklch(0.64 0.24 292);
-  --sidebar: oklch(0.12 0.018 285);
-  --sidebar-foreground: oklch(0.78 0.022 285);
-  --sidebar-accent: oklch(0.64 0.24 292);
-  --sidebar-border: oklch(0.25 0.022 285);
-  --streak: oklch(0.78 0.15 80);
-  --streak-foreground: oklch(0.18 0.05 80);
-  --rank-bronze: oklch(0.69 0.12 55);
-  --rank-silver: oklch(0.76 0.02 230);
-  --rank-gold: oklch(0.82 0.16 90);
-  --rank-platinum: oklch(0.8 0.08 190);
-  --rank-diamond: oklch(0.74 0.13 220);
+  --background: #11251E; /* Even Darker Forest Green */
+  --foreground: #F5EBE1;
+  --card: rgba(20, 45, 36, 0.75);
+  --card-foreground: #F5EBE1;
+  --popover: #11251E;
+  --popover-foreground: #F5EBE1;
+  --primary: #D8A47F;
+  --primary-foreground: #11251E;
+  --secondary: #4A6543;
+  --secondary-foreground: #F5EBE1;
+  --muted: #3D261A;
+  --muted-foreground: #C8B29F;
+  --accent: #8A563A;
+  --accent-foreground: #F5EBE1;
+  --destructive: #ff7675;
+  --destructive-foreground: #ffffff;
+  --border: rgba(245, 235, 225, 0.1);
+  --input: rgba(20, 45, 36, 0.9);
+  --ring: #D8A47F;
+  --sidebar: #0D1C16;
+  --sidebar-foreground: #F5EBE1;
+  --sidebar-accent: #4A6543;
+  --sidebar-border: rgba(245, 235, 225, 0.05);
+  --streak: #D8A47F;
+  --streak-foreground: #11251E;
+  --rank-bronze: #A66B4A;
+  --rank-silver: #4A6543;
+  --rank-gold: #D8A47F;
+  --rank-platinum: #E2CDBA;
+  --rank-diamond: #4A6543;
 }
 
 @layer base {
@@ -126,11 +126,21 @@
   #root {
     min-height: 100vh;
     background:
-      radial-gradient(circle at top right, color-mix(in oklab, var(--color-primary) 16%, transparent), transparent 32rem),
-      var(--color-background);
-    color: var(--color-foreground);
+      radial-gradient(circle at top left, #295447 0%, transparent 50%),
+      radial-gradient(circle at bottom right, #152720 0%, transparent 50%),
+      var(--background);
+    background-attachment: fixed;
+    color: var(--foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+  }
+
+  .dark html,
+  .dark body,
+  .dark #root {
+    background:
+      radial-gradient(circle at top left, #1C3B32 0%, transparent 50%),
+      #11251E;
   }
 
   body {
@@ -142,7 +152,7 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    letter-spacing: 0;
+    letter-spacing: -0.01em;
   }
 
   button,
@@ -161,7 +171,7 @@
   }
 
   ::selection {
-    background: color-mix(in oklab, var(--color-primary) 28%, transparent);
+    background: rgba(216, 164, 127, 0.4);
   }
 }
 
@@ -173,35 +183,61 @@
   }
 
   .surface-card {
-    background-color: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 22px 70px -50px color-mix(in oklab, var(--color-primary) 62%, black);
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-2xl);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.3);
+    transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 300ms ease;
+  }
+
+  .dark .surface-card {
+    box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.5);
+  }
+
+  .surface-card:hover {
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.4);
   }
 
   .surface-panel {
-    background-color: color-mix(in oklab, var(--color-card) 88%, transparent);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    backdrop-filter: blur(16px);
+    background-color: rgba(28, 59, 50, 0.6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-2xl);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .dark .surface-panel {
+    background-color: rgba(17, 37, 30, 0.6);
   }
 
   .control-input {
     width: 100%;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background-color: color-mix(in oklab, var(--color-card) 76%, var(--color-background));
-    color: var(--color-foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background-color: var(--input);
+    color: var(--foreground);
     outline: none;
     transition:
-      border-color 180ms ease,
-      box-shadow 180ms ease,
-      background-color 180ms ease;
+      border-color 200ms ease,
+      box-shadow 200ms ease,
+      background-color 200ms ease;
+  }
+
+  .dark .control-input {
+    background-color: var(--input);
   }
 
   .control-input:focus {
-    border-color: color-mix(in oklab, var(--color-primary) 76%, var(--color-border));
-    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 18%, transparent);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(216, 164, 127, 0.2);
+    background-color: rgba(45, 95, 80, 0.9);
+  }
+
+  .dark .control-input:focus {
+    background-color: rgba(30, 65, 53, 0.9);
+    box-shadow: 0 0 0 4px rgba(216, 164, 127, 0.15);
   }
 
   .primary-button {
@@ -209,20 +245,29 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border-radius: var(--radius-md);
-    background-color: var(--color-primary);
-    color: var(--color-primary-foreground);
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #E8B48E, #D8A47F);
+    color: var(--primary-foreground);
     font-family: var(--font-display);
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85rem;
+    box-shadow: 0 8px 24px -6px rgba(216, 164, 127, 0.4);
     transition:
-      transform 180ms ease,
-      background-color 180ms ease,
-      opacity 180ms ease;
+      transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 300ms ease,
+      filter 300ms ease;
   }
 
   .primary-button:hover {
-    transform: translateY(-1px);
-    background-color: color-mix(in oklab, var(--color-primary) 86%, white);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 16px 32px -8px rgba(216, 164, 127, 0.5);
+    filter: brightness(1.05);
+  }
+
+  .primary-button:active {
+    transform: translateY(1px) scale(0.98);
   }
 
   .secondary-button {
@@ -230,21 +275,35 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background-color: color-mix(in oklab, var(--color-card) 82%, transparent);
-    color: var(--color-foreground);
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    background-color: rgba(28, 59, 50, 0.5);
+    color: var(--foreground);
+    font-family: var(--font-display);
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85rem;
     transition:
-      border-color 180ms ease,
-      background-color 180ms ease,
-      transform 180ms ease;
+      border-color 300ms ease,
+      background-color 300ms ease,
+      transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 300ms ease;
+  }
+
+  .dark .secondary-button {
+    background-color: rgba(17, 37, 30, 0.5);
   }
 
   .secondary-button:hover {
-    transform: translateY(-1px);
-    border-color: color-mix(in oklab, var(--color-primary) 48%, var(--color-border));
-    background-color: color-mix(in oklab, var(--color-primary) 12%, var(--color-card));
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.2);
+    border-color: var(--primary);
+    background-color: rgba(45, 95, 80, 0.8);
+  }
+
+  .dark .secondary-button:hover {
+    background-color: rgba(30, 65, 53, 0.8);
   }
 
   .glow-primary {

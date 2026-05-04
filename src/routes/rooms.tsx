@@ -56,8 +56,8 @@ function RoomsPage() {
       const nextRooms = await fetchRooms();
       setRooms(nextRooms);
       if (!selectedRoomId && nextRooms[0]) setSelectedRoomId(nextRooms[0].id);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load rooms.");
+    } catch (err: any) {
+      setError(err?.message || "Could not load rooms.");
     } finally {
       setLoading(false);
     }
@@ -68,8 +68,8 @@ function RoomsPage() {
     setError(null);
     try {
       setBundle(await fetchRoomBundle(roomId));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load room.");
+    } catch (err: any) {
+      setError(err?.message || "Could not load room.");
       setBundle(null);
     } finally {
       setDetailLoading(false);
@@ -228,6 +228,11 @@ function RoomDetail({
   const myEntry = bundle.participants.find((entry) => entry.user_id === currentUserId) ?? null;
   const myRank = ranked.findIndex((entry) => entry.user_id === currentUserId) + 1;
 
+  const todayStr = new Date().toISOString().split("T")[0];
+  const hasMarkedToday = bundle.dailyProgress.some(
+    (dp) => dp.user_challenge_id === myEntry?.id && dp.date === todayStr
+  );
+
   const handleStart = async () => {
     if (!bundle.challenge) return;
     setBusy(true);
@@ -235,8 +240,8 @@ function RoomDetail({
     try {
       await startChallenge(bundle.challenge.id);
       await onReload();
-    } catch (err) {
-      onError(err instanceof Error ? err.message : "Could not start challenge.");
+    } catch (err: any) {
+      onError(err?.message || "Could not start challenge.");
     } finally {
       setBusy(false);
     }
@@ -250,8 +255,8 @@ function RoomDetail({
       await markDailyProgress(myEntry.id, proof.trim() || null);
       setProof("");
       await onReload();
-    } catch (err) {
-      onError(err instanceof Error ? err.message : "Could not save today's progress.");
+    } catch (err: any) {
+      onError(err?.message || "Could not save today's progress.");
     } finally {
       setBusy(false);
     }
@@ -319,11 +324,11 @@ function RoomDetail({
                 <button
                   type="button"
                   onClick={() => void handleProgress()}
-                  disabled={busy || myEntry.status === "completed"}
+                  disabled={busy || myEntry.status === "completed" || hasMarkedToday}
                   className="primary-button self-end px-4 py-2 disabled:opacity-50"
                 >
                   {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                  {myEntry.status === "completed" ? "Completed" : "Mark today"}
+                  {myEntry.status === "completed" ? "Completed" : hasMarkedToday ? "Done for today" : "Mark today"}
                 </button>
               </div>
             )}
@@ -480,8 +485,8 @@ function RoomChat({
     try {
       await sendRoomMessage({ roomId, userId: currentUserId, content: message });
       setMessage("");
-    } catch (err) {
-      onError(err instanceof Error ? err.message : "Could not send message.");
+    } catch (err: any) {
+      onError(err?.message || "Could not send message.");
     } finally {
       setSending(false);
     }
@@ -562,8 +567,8 @@ function CreateRoomModal({
     try {
       await createChallengeRoom({ name, difficulty, durationDays, title, description });
       await onCreated();
-    } catch (err) {
-      onError(err instanceof Error ? err.message : "Could not create room.");
+    } catch (err: any) {
+      onError(err?.message || "Could not create room.");
     } finally {
       setBusy(false);
     }

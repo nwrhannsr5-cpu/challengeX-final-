@@ -44,6 +44,7 @@ export interface Challenge {
   points_reward: number;
   icon: string | null;
   category: string | null;
+  total_days?: number;
 }
 
 export interface UserChallenge {
@@ -52,6 +53,7 @@ export interface UserChallenge {
   challenge_id: string;
   status: string;
   progress: number;
+  progress_count?: number;
   completed_at?: string | null;
 }
 

@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Trophy, Medal, Users, User, LogOut, Newspaper } from "lucide-react";
+import { LayoutDashboard, Trophy, Medal, Users, User, LogOut, Newspaper, Store } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 const items = [
@@ -8,6 +8,7 @@ const items = [
   { to: "/leaderboard", icon: Medal, label: "Leaderboard" },
   { to: "/rooms", icon: Users, label: "Rooms" },
   { to: "/feed", icon: Newspaper, label: "Feed" },
+  { to: "/partners", icon: Store, label: "Partners" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
 

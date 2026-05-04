@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { supabase, type Challenge, type UserChallenge } from "@/lib/supabase";
 import { challengeImage } from "@/lib/visuals";
 import { ProgressBar } from "@/components/Rank";
+import { RewardModal } from "@/components/RewardModal";
 
 export const Route = createFileRoute("/challenges")({
   head: () => ({ meta: [{ title: "Challenges - ChallengeX" }] }),
@@ -29,6 +30,7 @@ function ChallengesPage() {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [mine, setMine] = useState<Record<string, UserChallenge>>({});
   const [busy, setBusy] = useState<string | null>(null);
+  const [rewardModal, setRewardModal] = useState<Challenge | null>(null);
 
   const load = async () => {
     const { data } = await supabase
@@ -63,7 +65,8 @@ function ChallengesPage() {
           user_id: profile.id,
           challenge_id: c.id,
           status: "in_progress",
-          progress: 10,
+          progress: 0,
+          progress_count: 0,
         },
         { onConflict: "user_id,challenge_id" },
       );
@@ -79,30 +82,50 @@ function ChallengesPage() {
     }
   };
 
-  const complete = async (c: Challenge) => {
+  const markProgress = async (c: Challenge) => {
     if (!profile) return;
     setBusy(c.id);
     try {
+      const uc = mine[c.id];
+      const currentCount = uc?.progress_count || 0;
+      const totalDays = c.total_days || 7;
+      const nextCount = currentCount + 1;
+      const isComplete = nextCount >= totalDays;
+      const progressPercent = Math.min(100, Math.floor((nextCount / totalDays) * 100));
+
       await supabase.from("user_challenges").upsert(
         {
           user_id: profile.id,
           challenge_id: c.id,
-          status: "completed",
-          progress: 100,
-          completed_at: new Date().toISOString(),
+          status: isComplete ? "completed" : "in_progress",
+          progress: isComplete ? 100 : progressPercent,
+          progress_count: nextCount,
+          completed_at: isComplete ? new Date().toISOString() : null,
         },
         { onConflict: "user_id,challenge_id" },
       );
-      await supabase
-        .from("users")
-        .update({ total_points: (profile.total_points || 0) + c.points_reward })
-        .eq("id", profile.id);
-      await supabase.from("activity_log").insert({
-        user_id: profile.id,
-        action: "completed_challenge",
-        points: c.points_reward,
-        metadata: { challenge_id: c.id, title: c.title },
-      });
+
+      if (isComplete) {
+        await supabase
+          .from("users")
+          .update({ total_points: (profile.total_points || 0) + c.points_reward })
+          .eq("id", profile.id);
+        await supabase.from("activity_log").insert({
+          user_id: profile.id,
+          action: "completed_challenge",
+          points: c.points_reward,
+          metadata: { challenge_id: c.id, title: c.title },
+        });
+        setRewardModal(c);
+      } else {
+        await supabase.from("activity_log").insert({
+          user_id: profile.id,
+          action: "challenge_progress",
+          points: 0,
+          metadata: { challenge_id: c.id, title: c.title, day: nextCount },
+        });
+      }
+
       await refreshProfile();
       await load();
     } finally {
@@ -116,6 +139,14 @@ function ChallengesPage() {
         <h1 className="font-display text-3xl font-bold">Challenges</h1>
         <p className="text-sm text-muted-foreground">Start one. Crush it. Earn points.</p>
       </div>
+
+      {rewardModal && (
+        <RewardModal
+          title={rewardModal.title}
+          points={rewardModal.points_reward}
+          onClose={() => setRewardModal(null)}
+        />
+      )}
 
       {challenges.length === 0 ? (
         <div className="surface-card grid place-items-center p-12 text-center">
@@ -132,6 +163,8 @@ function ChallengesPage() {
             const done = uc?.status === "completed";
             const started = !!uc;
             const progress = done ? 1 : (uc?.progress ?? 0) / 100;
+            const currentCount = uc?.progress_count || 0;
+            const totalDays = c.total_days || 7;
             const Icon = pickIcon(c);
             return (
               <div
@@ -144,7 +177,7 @@ function ChallengesPage() {
                 }}
               >
                 <img
-                  src={challengeImage(c.category)}
+                  src={challengeImage(c.category, c.title)}
                   alt={`${c.category ?? "wellness"} challenge`}
                   className="h-36 w-full object-cover"
                 />
@@ -173,8 +206,8 @@ function ChallengesPage() {
                         {done
                           ? "Completed"
                           : started
-                            ? `In progress - ${uc!.progress}%`
-                            : "Not started"}
+                            ? `In progress - Day ${currentCount} of ${totalDays}`
+                            : `${totalDays} days challenge`}
                       </span>
                       {done ? (
                         <span
@@ -189,11 +222,11 @@ function ChallengesPage() {
                         </span>
                       ) : started ? (
                         <button
-                          onClick={() => complete(c)}
+                          onClick={() => markProgress(c)}
                           disabled={busy === c.id}
-                          className="rounded-[8px] bg-primary px-3 py-1.5 text-xs font-display font-semibold text-primary-foreground disabled:opacity-60"
+                          className="rounded-[8px] bg-primary px-3 py-1.5 text-xs font-display font-semibold text-primary-foreground disabled:opacity-60 transition-transform hover:scale-105 active:scale-95"
                         >
-                          {busy === c.id ? "..." : "Mark complete"}
+                          {busy === c.id ? "..." : `Mark Day ${currentCount + 1}`}
                         </button>
                       ) : (
                         <button

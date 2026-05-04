@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import { ProgressBar, RankBadge, getRank } from "@/components/Rank";
-import { Footprints, Flame, Apple, Droplet } from "lucide-react";
+import { Footprints, Flame, Apple, Droplet, Pencil } from "lucide-react";
 import { supabase, type ActivityLog } from "@/lib/supabase";
 import { healthImages } from "@/lib/visuals";
 
@@ -42,6 +42,34 @@ function Profile() {
     protein: 0,
     water: 0,
   });
+
+  const [editingGoal, setEditingGoal] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleUpdateGoal = async (currentValue: number, key: keyof typeof today) => {
+    if (!profile) return;
+    const num = Number(editValue);
+    if (isNaN(num) || num < 0) return;
+    setIsUpdating(true);
+
+    const diff = num - currentValue;
+    if (diff !== 0) {
+      const { error } = await supabase.from("activity_log").insert({
+        user_id: profile.id,
+        action: "manual_update",
+        metadata: { [key]: diff },
+      });
+      if (!error) {
+        setToday((prev) => ({ ...prev, [key]: num }));
+      } else {
+        console.error("Failed to insert activity_log:", error);
+      }
+    }
+    setEditingGoal(null);
+    setEditValue("");
+    setIsUpdating(false);
+  };
 
   useEffect(() => {
     if (!profile) return;
@@ -86,31 +114,35 @@ function Profile() {
   const goals = [
     {
       label: "Steps",
+      key: "steps" as const,
       icon: Footprints,
       value: today.steps,
       target: 10000,
-      color: "var(--color-primary)",
+      color: "var(--primary)",
     },
     {
       label: "Calories",
+      key: "calories" as const,
       icon: Flame,
       value: today.calories,
       target: profile.calorie_goal ?? 2200,
-      color: "var(--color-streak)",
+      color: "var(--streak)",
     },
     {
       label: "Protein (g)",
+      key: "protein" as const,
       icon: Apple,
       value: today.protein,
       target: 120,
-      color: "var(--color-secondary)",
+      color: "var(--secondary)",
     },
     {
       label: "Water (L)",
+      key: "water" as const,
       icon: Droplet,
       value: today.water,
       target: 2.5,
-      color: "var(--color-rank-platinum)",
+      color: "var(--rank-platinum)",
     },
   ];
 
@@ -174,8 +206,49 @@ function Profile() {
                   <g.icon className="h-3.5 w-3.5" style={{ color: g.color }} />
                   {g.label}
                 </span>
-                <span className="tabular text-muted-foreground">
-                  {g.value} / {g.target}
+                <span className="tabular text-muted-foreground flex items-center gap-3">
+                  {editingGoal === g.label ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        className="control-input h-7 w-20 px-2 py-0.5 text-xs"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        autoFocus
+                        disabled={isUpdating}
+                      />
+                      <button
+                        onClick={() => handleUpdateGoal(g.value, g.key)}
+                        disabled={isUpdating}
+                        className="primary-button h-7 px-3 py-0 text-xs shadow-none"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingGoal(null)}
+                        disabled={isUpdating}
+                        className="text-xs hover:text-foreground"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <span>
+                        {g.value} / {g.target}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setEditingGoal(g.label);
+                          setEditValue(g.value.toString());
+                        }}
+                        className="text-muted-foreground hover:text-primary transition-colors"
+                        title="Edit progress"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                    </>
+                  )}
                 </span>
               </div>
               <ProgressBar value={g.target ? g.value / g.target : 0} color={g.color} />
