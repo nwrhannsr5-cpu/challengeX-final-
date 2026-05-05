@@ -25,11 +25,14 @@ import {
   markDailyProgress,
   normalizeRoomProfile,
   rankParticipants,
+  requestJoinRoom,
+  handleRoomRequest,
   sendRoomMessage,
   startChallenge,
   type Difficulty,
   type RoomBundle,
   type RoomMessage,
+  type RoomRequest,
   type RoomSummary,
   type UserChallengeEntry,
 } from "@/services/challengeRooms";
@@ -233,15 +236,27 @@ function RoomDetail({
     (dp) => dp.user_challenge_id === myEntry?.id && dp.date === todayStr
   );
 
+  const isAdmin = bundle.room.created_by === currentUserId;
+  const myRequest = bundle.requests.find((req) => req.user_id === currentUserId);
+
   const handleStart = async () => {
     if (!bundle.challenge) return;
     setBusy(true);
     onError(null);
     try {
-      await startChallenge(bundle.challenge.id);
+      if (!myEntry) {
+        if (isAdmin) {
+          await startChallenge(bundle.challenge.id);
+        } else {
+          if (!currentUserId) throw new Error("Not logged in");
+          await requestJoinRoom(bundle.room.id, currentUserId);
+        }
+      } else {
+        await startChallenge(bundle.challenge.id);
+      }
       await onReload();
     } catch (err: any) {
-      onError(err?.message || "Could not start challenge.");
+      onError(err?.message || "Could not start/request challenge.");
     } finally {
       setBusy(false);
     }
@@ -294,7 +309,27 @@ function RoomDetail({
                 <div>
                   <h3 className="font-display font-bold">Ready to compete?</h3>
                   <p className="text-sm text-muted-foreground">
-                    Starting creates your server-timestamped challenge entry.
+                    {isAdmin
+                      ? "As admin, you can start the challenge instantly."
+                      : "Request to join the room and wait for admin approval."}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void handleStart()}
+                  disabled={busy || !bundle.challenge || myRequest?.status === "pending"}
+                  className="primary-button px-4 py-2 disabled:opacity-50"
+                >
+                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                  {isAdmin ? "Start" : myRequest?.status === "pending" ? "Pending..." : myRequest?.status === "rejected" ? "Rejected" : "Request to Join"}
+                </button>
+              </div>
+            ) : myEntry.status === "not_started" ? (
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 className="font-display font-bold">Request Approved!</h3>
+                  <p className="text-sm text-muted-foreground">
+                    You can now start tracking your daily progress.
                   </p>
                 </div>
                 <button
@@ -304,7 +339,7 @@ function RoomDetail({
                   className="primary-button px-4 py-2 disabled:opacity-50"
                 >
                   {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                  Start
+                  Start Tracking
                 </button>
               </div>
             ) : (
@@ -343,13 +378,16 @@ function RoomDetail({
       </section>
 
       <aside className="space-y-5">
+        {isAdmin && bundle.requests.some(r => r.status === "pending") && (
+          <AdminRequestsPanel requests={bundle.requests} onReload={onReload} onError={onError} />
+        )}
         <Leaderboard
           participants={ranked}
           totalDays={bundle.challenge?.total_days ?? bundle.room.duration_days}
           currentUserId={currentUserId}
           myRank={myRank}
         />
-        <RoomChat roomId={bundle.room.id} messages={bundle.messages} currentUserId={currentUserId} onError={onError} />
+        <RoomChat roomId={bundle.room.id} messages={bundle.messages} currentUserId={currentUserId} onError={onError} onReload={onReload} />
       </aside>
     </div>
   );
@@ -469,11 +507,13 @@ function RoomChat({
   messages,
   currentUserId,
   onError,
+  onReload,
 }: {
   roomId: string;
   messages: RoomMessage[];
   currentUserId: string | null;
   onError: (message: string | null) => void;
+  onReload: () => Promise<void>;
 }) {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -485,6 +525,7 @@ function RoomChat({
     try {
       await sendRoomMessage({ roomId, userId: currentUserId, content: message });
       setMessage("");
+      await onReload();
     } catch (err: any) {
       onError(err?.message || "Could not send message.");
     } finally {
@@ -656,3 +697,64 @@ function RoomSkeleton() {
     </div>
   );
 }
+
+function AdminRequestsPanel({ requests, onReload, onError }: { requests: RoomRequest[]; onReload: () => Promise<void>; onError: (msg: string) => void }) {
+  const pending = requests.filter(r => r.status === "pending");
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const handleAction = async (id: string, action: "approve" | "reject") => {
+    setBusyId(id);
+    try {
+      await handleRoomRequest(id, action);
+      await onReload();
+    } catch (err: any) {
+      onError(err?.message || "Could not handle request.");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  if (pending.length === 0) return null;
+
+  return (
+    <section className="surface-card p-5 border-primary/40 shadow-primary/5">
+      <h3 className="font-display text-xl font-bold flex items-center gap-2">
+        <Users className="h-5 w-5 text-primary" />
+        Join Requests
+      </h3>
+      <p className="mb-4 text-sm text-muted-foreground">Approve competitors to let them start.</p>
+      <div className="space-y-3">
+        {pending.map(req => {
+          const person = normalizeRoomProfile(req.profiles);
+          return (
+            <div key={req.id} className="flex items-center justify-between gap-3 rounded-[12px] bg-muted/20 p-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <Avatar name={person?.username ?? "User"} avatarUrl={person?.avatar_url ?? null} />
+                <div className="truncate font-display text-sm font-bold">{person?.username ?? "User"}</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => void handleAction(req.id, "approve")}
+                  disabled={!!busyId}
+                  className="rounded-full bg-primary/10 p-2 text-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-50 transition-colors"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleAction(req.id, "reject")}
+                  disabled={!!busyId}
+                  className="rounded-full bg-destructive/10 p-2 text-destructive hover:bg-destructive hover:text-destructive-foreground disabled:opacity-50 transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+

@@ -9,8 +9,20 @@ export interface RoomSummary {
   difficulty: Difficulty;
   duration_days: number;
   created_at: string;
+  created_by?: string;
   challenge?: RoomChallenge | null;
   participant_count: number;
+}
+
+export type RequestStatus = "pending" | "approved" | "rejected";
+
+export interface RoomRequest {
+  id: string;
+  room_id: string;
+  user_id: string;
+  status: RequestStatus;
+  created_at: string;
+  profiles: RoomProfile | RoomProfile[] | null;
 }
 
 export interface RoomChallenge {
@@ -62,6 +74,7 @@ export interface RoomBundle {
   participants: UserChallengeEntry[];
   dailyProgress: DailyProgress[];
   messages: RoomMessage[];
+  requests: RoomRequest[];
 }
 
 const CHALLENGE_SELECT = "id, room_id, title, description, total_days, created_at";
@@ -122,33 +135,21 @@ export async function createChallengeRoom({
   title: string;
   description: string;
 }) {
-  const { data: room, error: roomError } = await supabase
-    .from("challenge_rooms")
-    .insert({
-      name: name.trim(),
-      difficulty,
-      duration_days: durationDays,
-    })
-    .select("id")
-    .maybeSingle();
-
-  if (roomError) throw roomError;
-  if (!room) throw new Error("Room was not created.");
-
-  const { error: challengeError } = await supabase.from("challenges").insert({
-    room_id: room.id,
-    title: title.trim(),
-    description: description.trim(),
-    total_days: durationDays,
+  const { error } = await supabase.rpc("create_room_with_challenge", {
+    p_name: name.trim(),
+    p_difficulty: difficulty,
+    p_duration_days: durationDays,
+    p_title: title.trim(),
+    p_description: description.trim(),
   });
 
-  if (challengeError) throw challengeError;
+  if (error) throw error;
 }
 
 export async function fetchRoomBundle(roomId: string): Promise<RoomBundle> {
   const { data: room, error: roomError } = await supabase
     .from("challenge_rooms")
-    .select("id, name, difficulty, duration_days, created_at")
+    .select("id, name, difficulty, duration_days, created_at, created_by")
     .eq("id", roomId)
     .maybeSingle();
 
@@ -166,7 +167,7 @@ export async function fetchRoomBundle(roomId: string): Promise<RoomBundle> {
   if (challengeError) throw challengeError;
 
   const challengeRow = (challenge as RoomChallenge | null) ?? null;
-  const [{ data: participants, error: participantsError }, { data: messages, error: messagesError }] =
+  const [{ data: participants, error: participantsError }, { data: messages, error: messagesError }, { data: requests, error: requestsError }] =
     await Promise.all([
       challengeRow
         ? supabase
@@ -180,10 +181,33 @@ export async function fetchRoomBundle(roomId: string): Promise<RoomBundle> {
         .eq("room_id", roomId)
         .order("created_at", { ascending: true })
         .limit(80),
+      supabase
+        .from("room_requests")
+        .select("id, room_id, user_id, status, created_at")
+        .eq("room_id", roomId)
+        .order("created_at", { ascending: false }),
     ]);
 
   if (participantsError) throw participantsError;
   if (messagesError) throw messagesError;
+  if (requestsError) throw requestsError;
+
+  const requestRows = (requests ?? []) as unknown as RoomRequest[];
+  const requestUserIds = requestRows.map((req) => req.user_id);
+  
+  if (requestUserIds.length > 0) {
+    const { data: requestProfiles, error: requestProfilesError } = await supabase
+      .from("profiles")
+      .select("id, username, avatar_url")
+      .in("id", requestUserIds);
+      
+    if (!requestProfilesError && requestProfiles) {
+      const profileMap = new Map(requestProfiles.map(p => [p.id, p]));
+      for (const req of requestRows) {
+        req.profiles = profileMap.get(req.user_id) ?? null;
+      }
+    }
+  }
 
   const participantRows = (participants ?? []) as unknown as UserChallengeEntry[];
   const progressIds = participantRows.map((entry) => entry.id);
@@ -208,6 +232,7 @@ export async function fetchRoomBundle(roomId: string): Promise<RoomBundle> {
     participants: participantRows,
     dailyProgress: (progress ?? []) as DailyProgress[],
     messages: (messages ?? []) as unknown as RoomMessage[],
+    requests: requestRows,
   };
 }
 
@@ -296,4 +321,20 @@ export function getLevel(points: number) {
   if (points >= 2500) return "Pro";
   if (points >= 900) return "Intermediate";
   return "Beginner";
+}
+
+export async function requestJoinRoom(roomId: string, userId: string) {
+  const { error } = await supabase.from("room_requests").insert({
+    room_id: roomId,
+    user_id: userId,
+  });
+  if (error) throw error;
+}
+
+export async function handleRoomRequest(requestId: string, action: "approve" | "reject") {
+  const { error } = await supabase.rpc("handle_room_request", {
+    p_request_id: requestId,
+    p_status: action === "approve" ? "approved" : "rejected",
+  });
+  if (error) throw error;
 }
